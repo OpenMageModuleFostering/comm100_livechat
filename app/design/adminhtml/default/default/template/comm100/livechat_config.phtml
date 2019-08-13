@@ -1,0 +1,320 @@
+<div id="livechat">
+<style>
+.prompt-message {
+font-size: 14px;
+font-weight: 400;
+margin-bottom: 20px;
+}
+</style>
+<script src="https://hosted.comm100.com/AdminPluginService/livechatplugin.ashx?action=session" type="text/javascript"></script>
+<script type="text/javascript" src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_JS); ?>comm100/jquery-1.7.2.min.js"></script>
+<script src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_JS); ?>comm100/plugin.js" type="text/javascript"></script>
+<script type="text/javascript">
+	jQuery.noConflict();
+</script>
+<!-- link up start  -->
+<!--  already link up --> 
+<?php if (Mage::getStoreConfig('comm100/general/planid') >0 ): ?>
+<script type="text/javascript">
+jQuery(document).ready(function(){
+	checkExpire();
+});
+
+function checkExpire()
+{
+	comm100_plugin.issiteexpire();
+}
+
+</script>
+<div id="comm100livechat_guide">
+<div id="comm100livechat_expire" style="display:none;">
+<div class="notification-global" style="magin-left:5px;">
+Your  free trial has expired. <strong><a href="https://hosted.comm100.com/Billing/Client/Plan/ChooseLiveChat.aspx?siteid=<?php echo Mage::getStoreConfig('comm100/general/siteid') ?>" target="_blank">Buy Now</a></strong>
+</div>
+<div style="margin-top:18px;"></div> 
+</div>
+
+<p id="pInstalledOkTipMsg" ><span class="installed_ok">Your LiveChat code is installed
+properly.</span></p>
+<!--  static button  --> 
+<?php if (Mage::getStoreConfig('comm100/general/plantype') == 2): ?>
+<script>
+jQuery(document).ready(function(){
+	setStaticButtonJSCode();
+});
+</script>
+<h3>Install chat button</h3>
+<div class="wrap">
+<p>To install chat button on your page, you need to <strong>put
+the following code in your template</strong>:</p>
+ <textarea id="chat_button_code" cols="50" rows="12" style="width: 589px; height: 143px;"
+	readonly="readonly" onclick="this.select()"><!--Begin Comm100 Live Chat Code-->
+<div id="comm100-button-{codeplanid}"></div>  
+<script type="text/javascript">
+    var Comm100API = Comm100API || new Object;
+    Comm100API.chat_buttons = Comm100API.chat_buttons || [];
+    var comm100_chatButton = new Object;
+    comm100_chatButton.code_plan = {codeplanid};
+    comm100_chatButton.div_id = 'comm100-button-{codeplanid}';
+    Comm100API.chat_buttons.push(comm100_chatButton);
+    Comm100API.site_id = {siteid};
+    Comm100API.main_code_plan = {codeplanid};
+    var comm100_lc = document.createElement('script');
+    comm100_lc.type = 'text/javascript';
+    comm100_lc.async = true;
+    comm100_lc.src = 'https://chatserver.comm100.com/livechat.ashx?siteId=' + Comm100API.site_id;
+    var comm100_s = document.getElementsByTagName('script')[0];
+    comm100_s.parentNode.insertBefore(comm100_lc, comm100_s);
+</script>
+<!--End Comm100 Live Chat Code--></textarea>
+<p>Need help? Read more in <a
+	href="http://www.comm100.com/livechat/KnowledgeBase/How-to-install-Comm100-Live-Chat-on-your-Magento-site-_A5000247.aspx?id=5000247"
+	target="_blank">Comm100 live chat-Magento integration tutorial</a>.</p>
+</div>
+<?php endif; ?>
+ <!--  already link up  -->
+ <div style="margin-top:20px;"></div>
+<h3>Chat with visitor</h3>
+
+<p>To start chatting with them,
+you can:</p>
+<p><a href="http://www.comm100.com/livechat/download.aspx"
+	target="_blank">Download application</a> or <a
+	href="https://hosted.comm100.com/livechat/visitormonitor.aspx?siteid=<?php echo Mage::getStoreConfig('comm100/general/siteid'); ?>"
+	target="_blank">via web browser</a></p>
+<div style="margin-top:20px;"></div>
+<p>Customize your chat button, <a href="https://hosted.comm100.com/LiveChatFunc/CodePlan/ChatButton.aspx?ifEditPlan=true&codePlanId=<?php echo Mage::getStoreConfig('comm100/general/planid'); ?>&siteId=<?php echo Mage::getStoreConfig('comm100/general/siteid'); ?>" target="_blank">click here</a></p>
+
+<p>If you need help, free to <a href="http://www.comm100.com/company/contact.aspx" target="_blank">contact us</a></p>
+
+<div style="margin-top:20px;"></div>
+<div> 
+<table>
+<tr>
+<td>Linked Comm100 account : </td>
+<td><?php echo Mage::getStoreConfig('comm100/general/email'); ?> </td>
+</tr>
+<tr>
+
+<td><button style="" onclick="submitComm100Form_UnLink();return false;" id="btn_unlink"
+			class="scalable" type="button" title="Unlink this account"><span><span><span>Unlink this account</span></span></span></button>
+</td><td></td>
+</tr>
+</table>
+
+</div>
+</div>
+
+<?php endif; ?>
+<!-- link up end  -->
+
+<!-- not link up start  -->
+<?php if (Mage::getStoreConfig('comm100/general/planid') ==0 ): ?>
+<!-- login -->
+<div id="comm100livechat_login" style="display:block;">
+<h3>Link up your Comm100 account</h3>
+<table>
+<tr>
+<td><table class="form-table">
+	<tr>
+		<th scope="row"><label for="login_email">Email:</label></th>
+		<td><input type="text" class="input-text" name="login_email"
+			id="login_email" value="" /></td>
+	</tr>
+	<tr>
+		<th scope="row"><label for="login_password">Password:</label></th>
+		<td><input type="password" class="input-text" name="login_password"
+			id="login_password" value="" /></td>
+	</tr>
+	<tr>
+		<th scope="row"></th>
+		<td><a href="https://hosted.comm100.com/Admin/ForgotPassword.aspx"
+			target="_blank">Forgot password?</a></td>
+	</tr>
+	<tr>
+		<th></th>
+		<td>
+		<button style="" id="login_submit" onclick="comm100_plugin.sites();return false;"
+			class="scalable" type="button" title="Link Up"><span><span><span>Link Up</span></span></span></button>
+		</td>
+	</tr>
+</table></td>
+<td>Do not have account?
+<p>
+<a href="javascript:setStepShow(2);">Create one now</a></p>
+</td>
+</tr>
+</table>
+
+</div>
+<!--  login end -->
+<!-- Sites and code plan -->
+<div id="comm100livechat_site_and_plan" style="display:none;">
+<h3><!--  There are <span id="num_sites"
+	style="color: #EFC44C; font-weight: bold; font-size: larger;"></span>
+accounts associated with this operator email. <br />  --> Link up your Comm100 account</h3>
+<table>
+<tr>
+<td style="width:50%;"><table class="form-table">
+	<tbody><tr id="trSiteSelect">
+		<th scope="row"><label for="select_site">Choose a site:</label></th>
+		<td><select class="no-changes" style="width:150px;" id="comm100_sites_select" name="root_template">
+<option value="">Loading...</option>
+</select>
+</td>
+	</tr>
+	<tr>
+		<th scope="row"><label for="select_codeplan">Choose a code plan:</label></th>
+		<td><select class="no-changes" style="width:150px;" id="comm100_codeplans_select" name="root_template">
+<option value="">Loading...</option>
+</select></td>
+	</tr>
+	<tr>
+		<th></th>
+		<td>
+		<button title="Link Up" type="button" class="scalable" onclick="onComm100Save();" id="save_account" style=""><span><span><span>Link Up</span></span></span></button>
+		</td>
+	</tr>
+</tbody></table></td>
+<td>
+<!-- preview image  -->
+
+<div id="preViewImgBox">
+<strong><label>Preview</label></strong>
+<div id="preViewImgOnline">
+<img id="imgOnline" src="#" />
+<p>
+When Operators Online</p>
+</div>
+<div id="preViewImgOffline">
+<img id="imgOffline"src="#" />
+<p>
+When Operators Offline
+</p>
+</div>
+<div id="preViewTextButton">
+<label id="lblOnlineText"></label>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<!-- choose site and code plan end  -->
+<!-- New account form -->
+<div id="comm100livechat_register" style="display: none">
+<h3>Create new LiveChat account</h3>
+<table>
+<tr>
+<td style="width:50%;"><table class="form-table">
+	<tr>
+		<th scope="row"><label for="register_name">Name:</label></th>
+		<td><input type="text" class="input-text" name="register_name"
+			id="register_name" maxlength="100" /></td>
+	</tr>
+	<tr>
+		<th scope="row"><label for="register_email">E-mail:</label></th>
+		<td><input type="text" class="input-text"
+			name="register_email" id="register_email"
+			maxlength="70" /></td>
+	</tr>
+	<tr>
+		<th scope="row"><label for="register_password">Password:</label></th>
+		<td><input type="password" class="input-text"
+			name="register_password" id="register_password"
+			maxlength="70" /></td>
+	</tr>
+	<tr>
+		<th scope="row"><label for="register_password_retype">Retype
+		password:</label></th>
+		<td><input type="password" class="input-text"
+			name="register_password_retype"
+			id="register_password_retype" maxlength="70" /></td>
+	</tr>
+	<tr style="display:none">
+		<th scope="row"><label for="register_phone">Phone:</label></th>
+		<td><input type="text" class="input-text"
+			name="register_phone" id="register_phone"
+			maxlength="70" /></td>
+	</tr>
+
+	<tr>
+		<th scope="row"><label for="register_verification_code">Validation Code:</label></th>
+		<td>
+		<table>
+		<tr>
+		<td><input type="text" class="input-text"
+			name="register_verification_code" id="register_verification_code"
+			maxlength="70" /></td>
+		<td><img src=""  height="20px" onclick="setValidationCodeImage();" id="register_validation_img" /></td>
+		</tr>
+		</table>
+			</td>
+	</tr>
+
+	<tr>
+		<th></th>
+		<td>
+		<input type="hidden" id="register_ip" /> 
+		<input type="hidden" class="input-text"
+			name="register_website" id="register_website"
+			maxlength="70" />
+		<button style="" id="register_submit" onclick="comm100_plugin.register();return false;" class="scalable" type="button" title="Save"><span><span><span>Create</span></span></span></button>
+		</td>
+	</tr>
+	<tr>
+	<th></th>
+	<td style="width:120px;">By clicking "Create Account",you agree to our <a href="https://hosted.comm100.com/Admin/help/Comm100-Agreement.htm" target="_blank">Service Agreement</a> and <a href="http://www.comm100.com/privacy/" target="_blank">Privacy Policy</a></td>
+	</tr>
+	
+</table></td>
+<td>Already have an account?
+<p><a href="javascript:setStepShow(1);">Link up here</a></p>
+</td>
+</tr>
+</table>
+</div>
+<?php endif; ?>
+<!-- not link up end  -->
+</div>
+
+<div id="comm100_error" style="padding:10px;display:none;">
+							<div style="border:1px solid #c00;background-color:#ffebe8;padding:10px;border-radius: 3px;">
+								<b>Error</b>:&nbsp;<span id="comm100_error_text"></span>
+							</div>										
+</div>
+
+<span id="comm100_loading" style="display:none;">
+<img title="waitting" src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_SKIN); ?>/adminhtml/base/default/images/ajax_loader.gif">
+</span>
+<form id="comm100_form_link" method="post"
+	action="<?php echo $this->getUrl('*/*/post'); ?>"><input
+	name="form_key" type="hidden" id="form_key"
+	value="<?php echo Mage::getSingleton('core/session')->getFormKey() ?>" />
+<input type="hidden" id="txt_email" name="email" value="<?php echo Mage::getStoreConfig('comm100/general/email');?>" /> 
+<input type="hidden" id="txt_password" name="password" value="<?php echo Mage::getStoreConfig('comm100/general/password');?>" />  
+<input type="hidden" id="txt_plan_id" name="plan_id" value="<?php echo Mage::getStoreConfig('comm100/general/planid');?>" /> 
+<input type="hidden" id="txt_plan_type" name="plan_type" value="<?php echo Mage::getStoreConfig('comm100/general/plantype');?>" /> 
+<input type="hidden" id="txt_site_id" name="site_id" value="<?php echo Mage::getStoreConfig('comm100/general/siteid');?>" /> 
+<input type="hidden" id="txt_actiontype" name="actiontype" value="link" />
+<input type="hidden" id="txt_plugin_version" value="2.0.1" name="plugin_version" /> 
+<input type="hidden" id="txt_plugin_check_url" name="plugin_check_url" value="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_SKIN); ?>adminhtml/base/default/images/comm100_logo.gif" />
+<input type="hidden" id="txt_install_flag" name="install_flag" value="<?php echo Mage::getStoreConfig('comm100/advanced/installflag') ?>" />
+</form>
+	
+	<form id="comm100_form_unlink" method="post"
+	action="<?php echo $this->getUrl('*/*/post'); ?>">
+	<input
+	name="form_key" type="hidden" id="form_key"
+	value="<?php echo Mage::getSingleton('core/session')->getFormKey() ?>" />
+	<input type="hidden" id="actiontype" name="actiontype" value="unlink" />
+	</form>
+	<input type="hidden" id="txtCurrentStep" name="txtCurrentStep" value="1" />
+	<script>
+		//upload install action log
+		var installFlag = <?php echo Mage::getStoreConfig('comm100/advanced/installflag');?>;
+		if(installFlag==0)
+		{
+			uploadActionLog(2);
+		}
+	</script>

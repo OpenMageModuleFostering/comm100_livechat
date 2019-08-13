@@ -1,0 +1,1 @@
+<?xml version="1.0"?><layout version="1.0.1">    <default>		<reference name="footer">			<block type="livechat/livechat" name="head.comm100.livechat" >				<action method="setTemplate">					<template>comm100/livechat.phtml</template> 				</action>			</block>        </reference>    </default>  </layout> 
