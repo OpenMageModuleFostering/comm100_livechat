@@ -28,10 +28,18 @@ var comm100livechat_login = 'comm100livechat_login';
 //register div id
 var comm100livechat_register = 'comm100livechat_register';
 
+//service URL
+var Comm100RouteServiceDomain = "route.comm100.com"; 
+var Comm100RouteServiceDomain1 = "route1.comm100.com";
+var requestIndex = 0;
+
 String.prototype.trim = function()
 {
     return this.replace(/(^[\s]*)|([\s]*$)/g, "");
 }
+
+if (typeof comm100_script_id == 'undefined')
+	comm100_script_id = 0;
 
 function html_encode(html) {
 	var div=document.createElement("div");
@@ -39,11 +47,52 @@ function html_encode(html) {
 	div.appendChild(txt);
 	return div.innerHTML;
 }
+//STYPE 1: route domain 2: subdomain
+/*
+function comm100_script_request(STYPE,requestIndex,params,_success,_error)
+{
+	var _domain = Comm100RouteServiceDomain;
+	if(STYPE==1)
+	{
+		_domain = _domain + "/routeserver/pluginhandler.ashx";
+	}
+	if(STYPE==2)
+	{
+		var scr = document.createElement('script');
+		scr.src = 'https://'+jQuery("txt_cpanel_domain").val() + '/AdminPluginService/livechatplugin.ashx?action=session';
+		scr.type = 'text/javascript';
+		document.getElementsByTagName('head')[0].appendChild(scr);
+		alert(jQuery("txt_cpanel_domain").val());
+		_domain = jQuery("txt_cpanel_domain").val() + '/AdminPluginService/(S(' + comm100livechat_session + '))/livechatplugin.ashx';
+	}
+	var serviceUrl = "https://"+_domain+params;
+	jQuery.ajax({
+		type : "get",
+		async:false,
+		url : serviceUrl,
+		dataType : "jsonp",
+		jsonp: "callback",
+		jsonpCallback:"handleResponse",
+		success : function(json){
+			_success(json);
+		},
+		error : function(){
+			if(STYPE==1 && requestIndex == 0 )
+			{
+				comm100_script_request(STYPE,1,params,_success,_error);
+			}
+		}
+	});
+}
+*/
 
-if (typeof comm100_script_id == 'undefined')
-	comm100_script_id = 0;
-
-function comm100_script_request(params, success, error) {
+function comm100_script_request(STYPE,requestIndex,params, success, error) {
+//STYPE 1 : sites
+//STYPE 2 : other request
+//STYPE 3 : register
+	var timeoutsecond = 10;
+	if(STYPE==3)timeoutsecond = 30;
+	var cpanel_domain = jQuery("#txt_cpanel_domain").val();
 	function request() {
 		var _id = 'comm100_script_' + comm100_script_id++;
 		var _success;
@@ -60,12 +109,11 @@ function comm100_script_request(params, success, error) {
 			_append_script(_id, url + '&callback=' + _id + '.onresponse');
 			_timer_timeout = setTimeout(function() {
 				if (error) error('Operation timeout.');
-			}, 60 * 1000);
+			}, timeoutsecond * 1000);
 
 			_success = success || function() {};		
 		}
 		this.onresponse = function _onresponse(response) {
-			//alert(response.toString())£»
 			window[_id] = null;
 			var scr = document.getElementById('_' + _id);
 			document.getElementsByTagName('head')[0].removeChild(scr);
@@ -79,12 +127,31 @@ function comm100_script_request(params, success, error) {
 
 	var req = new request();
 
+	var _domain = Comm100RouteServiceDomain;
+	if(STYPE==1)
+	{
+		if(requestIndex==1)
+		{
+			_domain = Comm100RouteServiceDomain1;
+		}
+		_domain = _domain + "/routeserver/pluginhandler.ashx";
+	}
+	if(STYPE==2)
+	{
+		_domain = cpanel_domain + '/AdminPluginService/livechatplugin.ashx';
+	}
+	if(STYPE ==3)
+	{
+		_domain = Comm100RouteServiceDomain + "/routeserver/pluginhandler.ashx";
+	}
+	var serviceUrl = "https://"+_domain+params;
+	
 	if(typeof comm100livechat_session == null) {
         setTimeout(function() {
-	        req.send('https://hosted.comm100.com/AdminPluginService/(S(' + comm100livechat_session + '))/livechatplugin.ashx' + params, success, error);
+			req.send(serviceUrl, success, error);
         }, 1000);
 	} else {
-	    req.send('https://hosted.comm100.com/AdminPluginService/(S(' + comm100livechat_session + '))/livechatplugin.ashx' + params, success, error);
+		req.send(serviceUrl, success, error);
 	}
 }
 
@@ -128,7 +195,7 @@ var comm100_plugin = (function() {
         var website = document.getElementById('register_website').value;
         var ip = document.getElementById('register_ip').value;
         var timezone = _get_timezone();
-        var verification_code = document.getElementById('register_verification_code').value;
+        //var verification_code = document.getElementById('register_verification_code').value;
         var referrer = window.location.href;
         
         if(email=='')
@@ -168,10 +235,11 @@ var comm100_plugin = (function() {
         website = encodeURIComponent(website);
         ip = encodeURIComponent(ip);
         timezone = encodeURIComponent(timezone);
-        verification_code = encodeURIComponent(verification_code);
+        //verification_code = encodeURIComponent(verification_code);
+		var verification_code = '';
         referrer = encodeURIComponent(referrer);
         
-        comm100_script_request('?action=register&float_button=true&edition=' + edition + '&name=' + name + '&email=' + email +
+        comm100_script_request(3,0,'?action=register&float_button=true&edition=' + edition + '&name=' + name + '&email=' + email +
 			'&password=' + password + '&phone=' + phone + '&website=' + website + '&ip=' + ip + '&timezone=' + timezone + '&verificationCode=' + verification_code + '&referrer=' + referrer
 			+ '&source=' + source
 			, function(response) {
@@ -183,12 +251,11 @@ var comm100_plugin = (function() {
 			    }
 			    else {
 			        showErrorMessage(response.error);
-			        setValidationCodeImage();
 			     }
 
-			}, function(message) {
+			}, function(error) {
 				document.getElementById(register_submit).disabled = false;
-				showErrorMessage(response.error);
+				showErrorMessage('Operation timeout.');
 			});
     }
     
@@ -201,42 +268,53 @@ var comm100_plugin = (function() {
     		return 2; //others,  need widget
     	}
     }
+    
     function _login(success, error) {
-		var email = encodeURIComponent(document.getElementById('login_email').value);
-        var password = encodeURIComponent(document.getElementById('login_password').value);
+		var email = encodeURIComponent(document.getElementById('txt_email').value);
+        var password = encodeURIComponent(document.getElementById('txt_password').value);
         var timezone = encodeURIComponent(_get_timezone());
-
+        var site_id = encodeURIComponent(document.getElementById('txt_site_id').value);
         var site_id = encodeURIComponent(document.getElementById('txt_site_id').value.trim());
-        document.getElementById('txt_email').value = document.getElementById('login_email').value;
-        document.getElementById('txt_password').value = document.getElementById('login_password').value;
-        
-        comm100_script_request('?action=login&siteId=' + site_id + '&email=' + email + '&password=' + password
+        comm100_script_request(2,0,'?action=login&siteId=' + site_id + '&email=' + email + '&password=' + password
 			, function(response) {
-			    if(response.success) {
-			    	_get_plans(site_id, function(response) {
-			    		var plans = response;
-			    		if (plans.length == 1 && jQuery("#comm100_sites_select option").length==1 ) {
-					        //set plan and go to next step
-			    			jQuery("#txt_plan_id").val(plans[0].id);
-			    			jQuery("#txt_plan_type").val(_get_plan_type(plans[0]));
-			    			jQuery("#comm100_loading").hide();
-			    			var src = jQuery("#comm100_loading img:first").attr("src");
-			    			jQuery("#"+comm100livechat_site_and_plan).html("Linking up...<img src='" + src + "' />");
-			    			onComm100Save();
-				    	} else { 
-				    		_show_plans(plans);
-				    	}
-			    	});
-			    }
-			    else {
-				    error(response.error);
-			    }
+				if(response.success)
+				{
+					jQuery("#"+save_account).show();
+					_get_plans(site_id, function(response) {
+					jQuery("#preViewImgBox").show();
+
+					var plans = response;
+					if (plans.length == 1 && jQuery("#comm100_sites_select option").length==1 ) {
+						//set plan and go to next step
+						jQuery("#txt_plan_id").val(plans[0].id);
+						jQuery("#txt_plan_type").val(_get_plan_type(plans[0]));
+						jQuery("#comm100_loading").hide();
+						var src = jQuery("#comm100_loading img:first").attr("src");
+						jQuery("#"+comm100livechat_site_and_plan).html("Linking up...<img src='" + src + "' />");
+						onComm100Save();
+					} else { 
+						_show_plans(plans);
+					}
+					}); 
+					
+				}
+				else
+				{
+					jQuery("#"+save_account).hide();
+					jQuery("#preViewImgBox").hide();
+					var selPlansObj = jQuery("#comm100_codeplans_select");
+					selPlansObj.empty();
+					
+					showErrorMessage(response.error);
+				}
+			
 			}, function(message) {
-				error(response.message);
+				error(message);
 			});
     }
+
     function _get_plans(site_id, success, error) {
-        comm100_script_request('?action=plans&siteId=' + site_id, function(response) {
+        comm100_script_request(2,0,'?action=plans&siteId=' + site_id, function(response) {
             if(response.error) {
                 if (typeof error != 'undefined')
                     error('Comm100 Live Chat is not added to your site yet as you haven\'t linked up any Comm100 account.<br/><a href="admin.php?page=comm100livechat_settings">Link Up your account now</a> and start chatting with your visitors.');
@@ -303,6 +381,7 @@ var comm100_plugin = (function() {
     {
     	jQuery("#txt_plan_id").val(planid);
 		jQuery("#txt_plan_type").val(plantype);
+		
 		if(button_type==0)
 		{
 			if(img_online_id == 0 && img_online_url=="")
@@ -312,8 +391,9 @@ var comm100_plugin = (function() {
 	    	}
 			
 			var siteid = jQuery("#txt_site_id").val();
-			var img_online = "https://chatserver.comm100.com/DBResource/DBImage.ashx?imgId="+img_online_id+"&type="+img_type+"&siteId="+siteid;
-			var img_offline = "https://chatserver.comm100.com/DBResource/DBImage.ashx?imgId="+img_offline_id+"&type="+img_type+"&siteId="+siteid;
+			var main_chatserver_domain = jQuery("#txt_main_chatserver_domain").val();
+			var img_online = "https://"+main_chatserver_domain+"/DBResource/DBImage.ashx?imgId="+img_online_id+"&type="+img_type+"&siteId="+siteid;
+			var img_offline = "https://"+main_chatserver_domain+"/DBResource/DBImage.ashx?imgId="+img_offline_id+"&type="+img_type+"&siteId="+siteid;
 			if(img_type==0)
 			{
 				img_online = img_online_url;
@@ -350,12 +430,12 @@ var comm100_plugin = (function() {
     }
     
     function _get_code(site_id, plan_id, callback) {
-        comm100_script_request('?action=code&siteId=' + site_id + '&planId=' + plan_id, function(response) {
+        comm100_script_request(2,0,'?action=code&siteId=' + site_id + '&planId=' + plan_id, function(response) {
             callback(response.response);
         });
     }
     function _get_editions(callback) {
-        comm100_script_request('?action=editions', function(response) {
+        comm100_script_request(2,0,'?action=editions', function(response) {
             callback(response.response);
         });
     }
@@ -391,38 +471,79 @@ var comm100_plugin = (function() {
     		{
     			defaultSelectSiteId = s.id;
     		}
-    		selSitesObj.append("<option value='"+s.id+"'>"+s.id+"</option>");  
+			var  optionVal = s.id;
+    		selSitesObj.append("<option value='"+optionVal+"'>"+s.id+"</option>");  
     	}
     	
     	selSitesObj.change(function(){
     		showLoadingBar(save_account);
-    		var siteid = jQuery(this).children('option:selected').val();
+    		var optionVal = jQuery(this).children('option:selected').val();
+			var siteid = optionVal;
     		jQuery("#txt_site_id").val(siteid);
-    		_login(function () {
-    			hideLoadingBar();
-            }, function (error) {
-    		    showErrorMessage(error);        	
-            })
+			/*
+    		_get_plans(siteid, function(response) {
+	    		var plans = response;
+	    		if (plans.length == 1 && jQuery("#comm100_sites_select option").length==1 ) {
+			        //set plan and go to next step
+	    			jQuery("#txt_plan_id").val(plans[0].id);
+	    			jQuery("#txt_plan_type").val(_get_plan_type(plans[0]));
+	    			jQuery("#comm100_loading").hide();
+	    			var src = jQuery("#comm100_loading img:first").attr("src");
+	    			jQuery("#"+comm100livechat_site_and_plan).html("Linking up...<img src='" + src + "' />");
+	    			onComm100Save();
+		    	} else { 
+		    		_show_plans(plans);
+		    	}
+	    	}); */
+			_login(function () {
+				//hideLoadingBar();
+			}, function (error) {
+				//showErrorMessage(error);        	
+			});
     	});
     	
     	showLoadingBar(save_account);
     	jQuery("#txt_site_id").val(defaultSelectSiteId);
+		
+		/*
+    	_get_plans(defaultSelectSiteId, function(response) {
+    		var plans = response;
+    		if (plans.length == 1 && jQuery("#comm100_sites_select option").length==1 ) {
+		        //set plan and go to next step
+    			jQuery("#txt_plan_id").val(plans[0].id);
+    			jQuery("#txt_plan_type").val(_get_plan_type(plans[0]));
+    			jQuery("#comm100_loading").hide();
+    			var src = jQuery("#comm100_loading img:first").attr("src");
+    			jQuery("#"+comm100livechat_site_and_plan).html("Linking up...<img src='" + src + "' />");
+    			onComm100Save();
+	    	} else { 
+	    		_show_plans(plans);
+	    	}
+    	});
+        */
 		_login(function () {
-			hideLoadingBar();
+			//hideLoadingBar();
         }, function (error) {
-	        
-		    showErrorMessage(error);        	
-        })
-        
+		    //showErrorMessage(error);        	
+        });
+		
     	//document.getElementById('num_sites').innerHTML = sites.length;
     }
     
     function _sitesNoStep(email,password)
     {
-    	comm100_script_request('?action=sites&email='+email+'&password='+password+'&timezoneoffset='+(new Date()).getTimezoneOffset(), 
+		document.getElementById('txt_email').value = email;
+    	document.getElementById('txt_password').value = password;
+		
+    	comm100_script_request(1,0,'?action=sites&email='+email+'&password='+password+'&timezoneoffset='+(new Date()).getTimezoneOffset(), 
     	function (response) {
     		document.getElementById(login_submit).disabled = false;
     		if (response.success) {
+			
+				document.getElementById('txt_cpanel_domain').value = response.cpanel_domain;
+				jQuery("#txt_main_chatserver_domain").val(response.main_chatserver_domain);
+				jQuery("#txt_standby_chatserver_domain").val(response.standby_chatserver_domain);
+				
     			var sites = response.response;
     			if (sites.length == 0) {
     				showErrorMessage('There is no site associate this account');
@@ -445,20 +566,23 @@ var comm100_plugin = (function() {
 
     	var email = encodeURIComponent(document.getElementById('login_email').value);
         var password = encodeURIComponent(document.getElementById('login_password').value);
-        
-    	comm100_script_request('?action=sites&email='+email+'&password='+password+'&timezoneoffset='+(new Date()).getTimezoneOffset(), 
-    	function (response) {
-    		document.getElementById('login_submit').disabled = false;
+        var email1 = document.getElementById('login_email').value;
+    	comm100_script_request(1,0,'?action=sites&email='+email+'&password='+password+'&timezoneoffset='+(new Date()).getTimezoneOffset(), 
+    	function(response){
+			document.getElementById('login_submit').disabled = false;
     		if (response.success) {
     			var sites = response.response;
     			if (sites.length == 0) {
     				showErrorMessage('There is no site associate this account');
     				return;
     			}
-
+    			document.getElementById('txt_email').value = email1;
     			document.getElementById('txt_site_id').value = sites[0].id;
     			document.getElementById('txt_password').value = password;
-    			
+    			document.getElementById('txt_cpanel_domain').value = response.cpanel_domain;
+				jQuery("#txt_main_chatserver_domain").val(response.main_chatserver_domain);
+				jQuery("#txt_standby_chatserver_domain").val(response.standby_chatserver_domain);
+				
     			_show_sites(response.response);
     			
     		} else {
@@ -466,15 +590,40 @@ var comm100_plugin = (function() {
 			    
 			    document.getElementById('login_submit').disabled = false;
 			}
-    	});
+		},
+		function(){
+			comm100_script_request(1,1,'?action=sites&email='+email+'&password='+password+'&timezoneoffset='+(new Date()).getTimezoneOffset(), function(response){
+			document.getElementById('login_submit').disabled = false;
+    		if (response.success) {
+    			var sites = response.response;
+    			if (sites.length == 0) {
+    				showErrorMessage('There is no site associate this account');
+    				return;
+    			}
+    			document.getElementById('txt_email').value = email1;
+    			document.getElementById('txt_site_id').value = sites[0].id;
+    			document.getElementById('txt_password').value = password;
+    			document.getElementById('txt_cpanel_domain').value = response.cpanel_domain;
+				jQuery("#txt_main_chatserver_domain").val(response.main_chatserver_domain);
+				jQuery("#txt_standby_chatserver_domain").val(response.standby_chatserver_domain);
+    			_show_sites(response.response);
+    			
+    		} else {
+    			showErrorMessage(response.error);
+			    
+			    document.getElementById('login_submit').disabled = false;
+			}
+			},function(error){showErrorMessage(error);});
+		});
     }
     
     function _issiteexpire () {
         var siteid = jQuery("#txt_site_id").val();
+		var cpanel_domain = jQuery("#txt_cpanel_domain").val();
         var _data = '?action=issiteexpire&siteid='+siteid+'&timezoneoffset='+(new Date()).getTimezoneOffset();
-        var service = 'https://hosted.comm100.com/AdminPluginService/(S(' + comm100livechat_session + '))/livechatplugin.ashx' + _data;
+        var service = 'https://' + cpanel_domain + '/AdminPluginService/livechatplugin.ashx' + _data;
         
-        comm100_script_request(_data, 
+        comm100_script_request(2,0,_data, 
             	function (response) {
         	if (response.success) {
     			var result = response.response;
@@ -548,7 +697,6 @@ function setStepShow(step)
 	}
 	else if(step == 2)
 	{
-		setValidationCodeImage();
 		jQuery("#"+comm100livechat_register).show();
 	}
 	else if(step == 3)
@@ -654,14 +802,6 @@ function postDataToMagento(_email,_password,_site_id,_plan_id,_code)
 	});
 }
 
-function setValidationCodeImage()
-{
-	var d = new Date();
-	var timestamp = d.getMilliseconds();
-	jQuery("#register_validation_img").attr("src","");
-	jQuery("#register_validation_img").attr("src",'https://hosted.comm100.com/AdminPluginService/(S(' + comm100livechat_session + '))/livechatplugin.ashx?action=verification_code&timestamp='+timestamp);
-} 
-
 function resetLinkData()
 {
 	jQuery("#txt_email").val('');
@@ -679,10 +819,16 @@ function setStaticButtonJSCode()
 		var siteid = jQuery("#txt_site_id").val();
 		var planid = jQuery("#txt_plan_id").val();
 		var code = jQuery("#chat_button_code").val();
+		var main_chatserver_domain = jQuery("#txt_main_chatserver_domain").val();
+		var standby_chatserver_domain = jQuery("#txt_standby_chatserver_domain").val();
 		re_siteid = new RegExp("{siteid}", "g");
 		re_planid = new RegExp("{codeplanid}", "g");
+		re_main_chatserver_domain = new RegExp("{main_chatserver_domain}", "g");
+		re_standby_chatserver_domain = new RegExp("{standby_chatserver_domain}", "g");
 		code = code.replace(re_siteid,siteid);
 		code = code.replace(re_planid,planid);
+		code = code.replace(re_main_chatserver_domain,main_chatserver_domain);
+		code = code.replace(re_standby_chatserver_domain,standby_chatserver_domain);
 		jQuery("#chat_button_code").val(code);
 		jQuery("#pInstalledOkTipMsg").hide();
 	}	
@@ -704,8 +850,7 @@ function uploadActionLog(actionType)
 	var pluginVersionNo = encodeURIComponent(jQuery("#txt_plugin_version").val());
 	var checkPluginURL = encodeURIComponent(jQuery("#txt_plugin_check_url").val());
 	var _data = "?action=uploadactionlog&siteId="+siteId+"&actionType="+actionType+"&planId="+planId+"&appId="+appId+"&domain="+domain+"&linkedEmail="+linkedEmail+"&pluginVersionNo="+pluginVersionNo+"&checkPluginURL="+checkPluginURL+"&timezoneoffset="+(new Date()).getMilliseconds();;
-	//var service = 'https://hosted.comm100.com/AdminPluginService/(S(' + comm100livechat_session + '))/livechatplugin.ashx' + _data;
-	comm100_script_request(_data, function(response) {
+	comm100_script_request(2,0,_data, function(response) {
 			    goAfterLog(actionType);
 			}, function(message) {
 				goAfterLog(actionType);

@@ -116,79 +116,46 @@ class Comm100_Livechat_Adminhtml_LivechatController extends Mage_Adminhtml_Contr
 		!isset($_POST['plan_id']) ? $plan_id = '0' : $plan_id = $_POST['plan_id'];  
 		!isset($_POST['plan_type']) ? $plan_type = '0' : $plan_type = $_POST['plan_type']; 
 		!isset($_POST['site_id']) ? $site_id = '0' : $site_id = $_POST['site_id']; 
+		!isset($_POST['cpanel_domain']) ? $cpanel_domain = '' : $cpanel_domain = $_POST['cpanel_domain'];
+		!isset($_POST['main_chatserver_domain']) ? $main_chatserver_domain = '' : $main_chatserver_domain = $_POST['main_chatserver_domain'];
+		!isset($_POST['standby_chatserver_domain']) ? $standby_chatserver_domain = '' : $standby_chatserver_domain = $_POST['standby_chatserver_domain'];
 
 		//decode
 		$email = urldecode($email);
 		
-		Mage::log('$site_id='.$site_id.'$plan_id='.$plan_id, null, "comm100.log"); 
+		Mage::log('$cpanel_domain='.$cpanel_domain.'$main_chatserver_domain='.$main_chatserver_domain.'$standby_chatserver_domain='.$standby_chatserver_domain, null, "comm100.log"); 
 		
-		$this->updateConfigData($email,$password,$site_id,$plan_id,$plan_type);
+		$this->updateConfigData($email,$password,$site_id,$plan_id,$plan_type,$cpanel_domain,$main_chatserver_domain,$standby_chatserver_domain);
 		
 	}
 	
-	private function updateConfigData($email,$password,$site_id,$plan_id,$plan_type)
+	private function updateConfigData($email,$password,$site_id,$plan_id,$plan_type,$cpanel_domain,$main_chatserver_domain,$standby_chatserver_domain)
 	{
 		try 
 		{
 		$config_table = Mage::getSingleton('core/resource')->getTableName('core_config_data');
 		Mage::log('$config_table is '.$config_table, null, "comm100.log"); 
-		$read = Mage::getSingleton('core/resource')->getConnection('core_read');
-		$query = 'SELECT * FROM ' . $config_table;
-		$query .= ' WHERE scope="default" AND scope_id=0 AND path="comm100/general/planid" ';
-		$results = $read->fetchAll($query);
-
 		$write = Mage::getSingleton('core/resource')->getConnection('core_write');
-
-		//check for existing configurations
-		if ($row = array_pop($results)) {
+		$query = 'delete FROM ' . $config_table;
+		$query .= ' WHERE scope="default" AND scope_id=0 AND path like "%comm100/general/%" ';
+		$write->query($query);
+ 
+		$query = 'INSERT INTO ' . $config_table;
+		$query .= ' (scope, scope_id, path, value)';
+		$query .= ' VALUES ("default", 0, "comm100/general/planid", "' . $plan_id . '"),';
+		$query .= ' ("default", 0, "comm100/general/plantype", "'. $plan_type .'"),';
+		$query .= ' ("default", 0, "comm100/general/siteid", "'. $site_id .'"),';
+		$query .= ' ("default", 0, "comm100/general/email", "'. $email .'"),';
+		$query .= ' ("default", 0, "comm100/general/password", "'. $password .'"),';
+		$query .= ' ("default", 0, "comm100/general/code", ""), ';
+		$query .= ' ("default", 0, "comm100/general/cpanel_domain","'. $cpanel_domain .'"),';
+		$query .= ' ("default", 0, "comm100/general/main_chatserver_domain", "'. $main_chatserver_domain .'"),';
+		$query .= ' ("default", 0, "comm100/general/standby_chatserver_domain", "'. $standby_chatserver_domain .'")';
+		$write->query($query);
 		
-			$config_id = $row['config_id'];
-			
-			Mage::log('exist config siteid is '.$config_id, null, "comm100.log"); 
-			
-			$query = 'UPDATE ' . $config_table;
-			$query .= ' SET value="' . $plan_id . '"';
-			$query .= ' WHERE config_id=' . $config_id;
-			$write->query($query);
-			
-			$query = 'UPDATE ' . $config_table;
-			$query .= ' SET value="' . $plan_type . '"';
-			$query .= ' WHERE config_id=' . ++$config_id;
-			$write->query($query);
-			
-			$query = 'UPDATE ' . $config_table;
-			$query .= ' SET value="' . $site_id . '"';
-			$query .= ' WHERE config_id=' . ++$config_id;
-			$write->query($query);
-			
-			$query = 'UPDATE ' . $config_table;
-			$query .= ' SET value="' . $email . '"';
-			$query .= ' WHERE config_id=' . ++$config_id;
-			$write->query($query);
-			
-			$query = 'UPDATE ' . $config_table;
-			$query .= ' SET value="' . $password . '"';
-			$query .= ' WHERE config_id=' . ++$config_id;
-			$write->query($query);
-			
-			$query = 'UPDATE ' . $config_table;
-			$query .= ' SET value=""';
-			$query .= ' WHERE config_id=' . ++$config_id;
-			$write->query($query);
-		} else {
-			
-			Mage::log('no exist config ', null, "comm100.log"); 
-			
-			$query = 'INSERT INTO ' . $config_table;
-			$query .= ' (scope, scope_id, path, value)';
-			$query .= ' VALUES ("default", 0, "comm100/general/planid", "' . $plan_id . '"),';
-			$query .= ' ("default", 0, "comm100/general/plantype", "'. $plan_type .'"),';
-			$query .= ' ("default", 0, "comm100/general/siteid", "'. $site_id .'"),';
-			$query .= ' ("default", 0, "comm100/general/email", "'. $email .'"),';
-			$query .= ' ("default", 0, "comm100/general/password", "'. $password .'"),';
-			$query .= ' ("default", 0, "comm100/general/code", "")';
-			$write->query($query);
-		}
+		//clear cache
+		Mage::app()->cleanCache();
+		
 		}
 		catch(Exception $ex)
 		{

@@ -6,7 +6,6 @@ font-weight: 400;
 margin-bottom: 20px;
 }
 </style>
-<script src="https://hosted.comm100.com/AdminPluginService/livechatplugin.ashx?action=session" type="text/javascript"></script>
 <script type="text/javascript" src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_JS); ?>comm100/jquery-1.7.2.min.js"></script>
 <script src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_JS); ?>comm100/plugin.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -18,6 +17,7 @@ margin-bottom: 20px;
 <script type="text/javascript">
 jQuery(document).ready(function(){
 	checkExpire();
+	//comm100_plugin.login();
 });
 
 function checkExpire()
@@ -29,7 +29,7 @@ function checkExpire()
 <div id="comm100livechat_guide">
 <div id="comm100livechat_expire" style="display:none;">
 <div class="notification-global" style="magin-left:5px;">
-Your  free trial has expired. <strong><a href="https://hosted.comm100.com/Billing/Client/Plan/ChooseLiveChat.aspx?siteid=<?php echo Mage::getStoreConfig('comm100/general/siteid') ?>" target="_blank">Buy Now</a></strong>
+Your  free trial has expired. <strong><a href="https://<?php echo Mage::getStoreConfig('comm100/general/cpanel_domain')?>/Billing/Client/Plan/ChooseLiveChat.aspx?siteid=<?php echo Mage::getStoreConfig('comm100/general/siteid') ?>" target="_blank">Buy Now</a></strong>
 </div>
 <div style="margin-top:18px;"></div> 
 </div>
@@ -48,8 +48,9 @@ jQuery(document).ready(function(){
 <p>To install chat button on your page, you need to <strong>put
 the following code in your template</strong>:</p>
  <textarea id="chat_button_code" cols="50" rows="12" style="width: 589px; height: 143px;"
-	readonly="readonly" onclick="this.select()"><!--Begin Comm100 Live Chat Code-->
-<div id="comm100-button-{codeplanid}"></div>  
+	readonly="readonly" onclick="this.select()">
+<!--Begin Comm100 Live Chat Code-->
+<div id="comm100-button-{codeplanid}"></div>
 <script type="text/javascript">
     var Comm100API = Comm100API || new Object;
     Comm100API.chat_buttons = Comm100API.chat_buttons || [];
@@ -59,14 +60,28 @@ the following code in your template</strong>:</p>
     Comm100API.chat_buttons.push(comm100_chatButton);
     Comm100API.site_id = {siteid};
     Comm100API.main_code_plan = {codeplanid};
+
     var comm100_lc = document.createElement('script');
     comm100_lc.type = 'text/javascript';
     comm100_lc.async = true;
-    comm100_lc.src = 'https://chatserver.comm100.com/livechat.ashx?siteId=' + Comm100API.site_id;
+    comm100_lc.src = 'https://{main_chatserver_domain}/livechat.ashx?siteId=' + Comm100API.site_id;
     var comm100_s = document.getElementsByTagName('script')[0];
     comm100_s.parentNode.insertBefore(comm100_lc, comm100_s);
+
+    setTimeout(function() {
+        if (!Comm100API.loaded) {
+            var lc = document.createElement('script');
+            lc.type = 'text/javascript';
+            lc.async = true;
+            lc.src = 'https://{standby_chatserver_domain}/livechat.ashx?siteId=' + Comm100API.site_id;
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(lc, s);
+        }
+    }, 5000)
 </script>
-<!--End Comm100 Live Chat Code--></textarea>
+<!--End Comm100 Live Chat Code-->
+
+</textarea>
 <p>Need help? Read more in <a
 	href="http://www.comm100.com/livechat/KnowledgeBase/How-to-install-Comm100-Live-Chat-on-your-Magento-site-_A5000247.aspx?id=5000247"
 	target="_blank">Comm100 live chat-Magento integration tutorial</a>.</p>
@@ -80,10 +95,10 @@ the following code in your template</strong>:</p>
 you can:</p>
 <p><a href="http://www.comm100.com/livechat/download.aspx"
 	target="_blank">Download application</a> or <a
-	href="https://hosted.comm100.com/livechat/visitormonitor.aspx?siteid=<?php echo Mage::getStoreConfig('comm100/general/siteid'); ?>"
+	href="https://<?php echo Mage::getStoreConfig('comm100/general/cpanel_domain')?>/livechat/visitormonitor.aspx?siteid=<?php echo Mage::getStoreConfig('comm100/general/siteid'); ?>"
 	target="_blank">via web browser</a></p>
 <div style="margin-top:20px;"></div>
-<p>Customize your chat button, <a href="https://hosted.comm100.com/LiveChatFunc/CodePlan/ChatButton.aspx?ifEditPlan=true&codePlanId=<?php echo Mage::getStoreConfig('comm100/general/planid'); ?>&siteId=<?php echo Mage::getStoreConfig('comm100/general/siteid'); ?>" target="_blank">click here</a></p>
+<p>Customize your chat button, <a href="https://<?php echo Mage::getStoreConfig('comm100/general/cpanel_domain')?>/LiveChatFunc/CodePlan/ChatButton.aspx?ifEditPlan=true&codePlanId=<?php echo Mage::getStoreConfig('comm100/general/planid'); ?>&siteId=<?php echo Mage::getStoreConfig('comm100/general/siteid'); ?>" target="_blank">click here</a></p>
 
 <p>If you need help, free to <a href="http://www.comm100.com/company/contact.aspx" target="_blank">contact us</a></p>
 
@@ -128,7 +143,7 @@ you can:</p>
 	</tr>
 	<tr>
 		<th scope="row"></th>
-		<td><a href="https://hosted.comm100.com/Admin/ForgotPassword.aspx"
+		<td><a href="https://www.comm100.com/secure/forgotpassword.aspx"
 			target="_blank">Forgot password?</a></td>
 	</tr>
 	<tr>
@@ -175,8 +190,7 @@ accounts associated with this operator email. <br />  --> Link up your Comm100 a
 		<button title="Link Up" type="button" class="scalable" onclick="onComm100Save();" id="save_account" style=""><span><span><span>Link Up</span></span></span></button>
 		</td>
 	</tr>
-</tbody></table></td>
-<td>
+</tbody></table></td><td>
 <!-- preview image  -->
 
 <div id="preViewImgBox">
@@ -239,20 +253,6 @@ When Operators Offline
 	</tr>
 
 	<tr>
-		<th scope="row"><label for="register_verification_code">Validation Code:</label></th>
-		<td>
-		<table>
-		<tr>
-		<td><input type="text" class="input-text"
-			name="register_verification_code" id="register_verification_code"
-			maxlength="70" /></td>
-		<td><img src=""  height="20px" onclick="setValidationCodeImage();" id="register_validation_img" /></td>
-		</tr>
-		</table>
-			</td>
-	</tr>
-
-	<tr>
 		<th></th>
 		<td>
 		<input type="hidden" id="register_ip" /> 
@@ -264,7 +264,7 @@ When Operators Offline
 	</tr>
 	<tr>
 	<th></th>
-	<td style="width:120px;">By clicking "Create Account",you agree to our <a href="https://hosted.comm100.com/Admin/help/Comm100-Agreement.htm" target="_blank">Service Agreement</a> and <a href="http://www.comm100.com/privacy/" target="_blank">Privacy Policy</a></td>
+	<td style="width:120px;">By clicking "Create Account",you agree to our <a href="http://www.comm100.com/help/Comm100-Agreement.htm" target="_blank">Service Agreement</a> and <a href="http://www.comm100.com/privacy/" target="_blank">Privacy Policy</a></td>
 	</tr>
 	
 </table></td>
@@ -298,6 +298,9 @@ When Operators Offline
 <input type="hidden" id="txt_site_id" name="site_id" value="<?php echo Mage::getStoreConfig('comm100/general/siteid');?>" /> 
 <input type="hidden" id="txt_actiontype" name="actiontype" value="link" />
 <input type="hidden" id="txt_plugin_version" value="2.0.1" name="plugin_version" /> 
+<input type="hidden" id="txt_cpanel_domain" value="<?php echo Mage::getStoreConfig('comm100/general/cpanel_domain');?>" name="cpanel_domain" />
+<input type="hidden" id="txt_main_chatserver_domain" value="<?php echo Mage::getStoreConfig('comm100/general/main_chatserver_domain');?>" name="main_chatserver_domain" /> 
+<input type="hidden" id="txt_standby_chatserver_domain" value="<?php echo Mage::getStoreConfig('comm100/general/standby_chatserver_domain');?>" name="standby_chatserver_domain" /> 
 <input type="hidden" id="txt_plugin_check_url" name="plugin_check_url" value="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_SKIN); ?>adminhtml/base/default/images/comm100_logo.gif" />
 <input type="hidden" id="txt_install_flag" name="install_flag" value="<?php echo Mage::getStoreConfig('comm100/advanced/installflag') ?>" />
 </form>

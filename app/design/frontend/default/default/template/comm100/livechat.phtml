@@ -4,9 +4,11 @@
 var plan_id = <?php echo Mage::getStoreConfig('comm100/general/planid');?>;
 var site_id = <?php echo Mage::getStoreConfig('comm100/general/siteid'); ?>;
 var plan_type = <?php echo Mage::getStoreConfig('comm100/general/plantype'); ?>;
+var main_chatserver_domain = '<?php echo Mage::getStoreConfig('comm100/general/main_chatserver_domain'); ?>';
+var standby_chatserver_domain = '<?php echo Mage::getStoreConfig('comm100/general/standby_chatserver_domain'); ?>';
 </script>
 <!--Begin Comm100 Live Chat Code-->
-<div id="comm100-button-<?php echo Mage::getStoreConfig('comm100/general/planid');?>"></div>  
+<div id="comm100-button-<?php echo Mage::getStoreConfig('comm100/general/planid');?>"></div>
 <script type="text/javascript">
     var Comm100API = Comm100API || new Object;
     Comm100API.chat_buttons = Comm100API.chat_buttons || [];
@@ -16,13 +18,28 @@ var plan_type = <?php echo Mage::getStoreConfig('comm100/general/plantype'); ?>;
     Comm100API.chat_buttons.push(comm100_chatButton);
     Comm100API.site_id = site_id;
     Comm100API.main_code_plan = plan_id;
+
     var comm100_lc = document.createElement('script');
     comm100_lc.type = 'text/javascript';
     comm100_lc.async = true;
-    comm100_lc.src = 'https://chatserver.comm100.com/livechat.ashx?siteId=' + Comm100API.site_id;
+    comm100_lc.src = 'https://'+main_chatserver_domain+'/livechat.ashx?siteId=' + Comm100API.site_id;
     var comm100_s = document.getElementsByTagName('script')[0];
     comm100_s.parentNode.insertBefore(comm100_lc, comm100_s);
+
+    setTimeout(function() {
+        if (!Comm100API.loaded) {
+            var lc = document.createElement('script');
+            lc.type = 'text/javascript';
+            lc.async = true;
+            lc.src = 'https://'+standby_chatserver_domain+'/livechat.ashx?siteId=' + Comm100API.site_id;
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(lc, s);
+        }
+    }, 5000)
 </script>
 <!--End Comm100 Live Chat Code-->
 <?php endif; ?>
 <?php endif; ?>
+
+
+
