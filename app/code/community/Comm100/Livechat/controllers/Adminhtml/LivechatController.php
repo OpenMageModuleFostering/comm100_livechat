@@ -1,5 +1,5 @@
 <?php
-class Comm100_Livechat_Adminhtml_LivechatController extends Mage_Adminhtml_Controller_action
+class Comm100_Livechat_Adminhtml_LivechatController extends Mage_Adminhtml_Controller_Action
 {
  
 	public function indexAction() {
