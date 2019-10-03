@@ -1,7 +1,7 @@
 {
-    "name": "OpenMageModuleFostering\/comm100_livechat",
+    "name": "openmage-module-fostering\/comm100_livechat",
     "type": "magento-module",
-    "license": "comm100_livechat",
+    "license": "OSL-3.0",
     "homepage": "",
     "description": "Comm100 Live Chat for Magento is specifically designed for Magento users to quickly get a customer-facing live chat system up and running on their Magento based stores.",
     "authors": [

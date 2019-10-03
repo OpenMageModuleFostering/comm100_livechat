@@ -1,3 +1,5 @@
+
+
 ## Original Package Description
 
 Comm100 Live Chat for Magento is specifically designed for Magento users to quickly get a customer-facing live chat system up and running on their Magento based stores.
