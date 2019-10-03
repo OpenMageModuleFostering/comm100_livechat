@@ -1,16 +1,19 @@
 {
-    "name": "OpenMageModuleFostering/comm100_livechat",
+    "name": "OpenMageModuleFostering\/comm100_livechat",
     "type": "magento-module",
     "license": "comm100_livechat",
     "homepage": "",
     "description": "Comm100 Live Chat for Magento is specifically designed for Magento users to quickly get a customer-facing live chat system up and running on their Magento based stores.",
     "authors": [
-    {
-        "name": "comm100",
-        "email": "support@comm100.com"
-    }
-],
+        {
+            "name": "comm100",
+            "email": "support@comm100.com"
+        }
+    ],
     "suggest": {
-        "magento-hackathon/magento-composer-installer": "*"
-    }
+        "magento-hackathon\/magento-composer-installer": "*"
+    },
+    "keywords": [
+        "openmage-module"
+    ]
 }
